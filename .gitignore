@@ -1,0 +1,15 @@
+# Ignore compiled Java class files
+*.class
+
+# Ignore IDE specific folders and files
+bin/
+.settings/
+.project
+.classpath
+.factorypath
+
+# Ignore IntelliJ IDEA files
+.idea/
+*.iml
+*.log
+/.metadata/
