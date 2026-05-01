@@ -25,11 +25,13 @@ public class Order {
 	}
 
 	public void attachPayment(Payment payment) {
-		if(this.payment != null) {
+		if (this.payment != null) {
 			throw new IllegalStateException("Payment already attached to order " + id);
 		}
 		this.payment = Objects.requireNonNull(payment);
 	}
-	
-	public Payment getPayment() { return payment; }
+
+	public Payment getPayment() {
+		return payment;
+	}
 }
