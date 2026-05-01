@@ -9,41 +9,40 @@ import java.util.Objects;
 public class OrderService {
 	private final PaymentService paymentService = new PaymentService();
 	private final List<Payment> paymentHistory = new ArrayList<>();
-	
-	public  BigDecimal processOrderPayment(Order order, BigDecimal balance) {
-				
-		Payment payment = new Payment(order.getAmount());
-		order.attachPayment(payment);
-		
-		BigDecimal newBalance = paymentService.processPayment(payment, balance);
-		paymentHistory.add(payment);
-		
-		if(payment.getStatus() == PaymentStatus.SUCCESS) {
-			return balance.subtract(order.getAmount());
+
+	public BigDecimal processPaymentForOrder(Order order, BigDecimal balance) {
+		Objects.requireNonNull(order, "Order cannot be null");
+
+		if (order.getPayment() == null) {
+			order.attachPayment(new Payment(order.getAmount()));
 		}
-		return newBalance;	
+
+		Payment payment = order.getPayment();
+		BigDecimal newBalance = paymentService.processPayment(payment, balance);
+
+		paymentHistory.add(payment);
+
+		return newBalance;
 	}
-	
-	public List<Payment> getPaymentHistory(){
+
+	public List<Payment> getPaymentHistory() {
 		return List.copyOf(paymentHistory);
 	}
+
 	public BigDecimal getTotalRevenue(Order[] orders) {
 		Objects.requireNonNull(orders, "Orders array cannot be null");
 		return Arrays.stream(orders)
-					.filter(o -> o.getPayment() != null && o.getPayment().getStatus() == PaymentStatus.SUCCESS)
-					.map(Order::getAmount)
-					.reduce(BigDecimal.ZERO, BigDecimal::add);
+				.filter(o -> o.getPayment() != null && o.getPayment().getStatus() == PaymentStatus.SUCCESS)
+				.map(Order::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 
-	public List<Order> getSuccessfulOrdersList(Order[] orders){
+	public List<Order> getSuccessfulOrdersList(Order[] orders) {
 		return Arrays.stream(orders)
-					.filter(o -> o.getPayment() != null && o.getPayment().getStatus() == PaymentStatus.SUCCESS)
-					.toList();
+				.filter(o -> o.getPayment() != null && o.getPayment().getStatus() == PaymentStatus.SUCCESS).toList();
 	}
-	
+
 	public List<Order> getFailedOrdersList(Order[] orders) {
-		return Arrays.stream(orders)
-					.filter(o -> o.getPayment() != null && o.getPayment().getStatus().name().startsWith("FAILED"))
-					.toList();
+		return Arrays.stream(orders).filter(o -> o.getPayment() != null && o.getPayment().getStatus().isFailed())
+				.toList();
 	}
 }
