@@ -5,16 +5,16 @@ import java.util.Objects;
 
 public class PaymentService {
 	
-	public BigDecimal processPayment(Payment payment, BigDecimal balance) {
+	public BigDecimal processPayment(Payment payment, BigDecimal currentBalance) {
 		Objects.requireNonNull(payment, "Payment entity cannot be null");
+		Objects.requireNonNull(currentBalance, "Balance cannot be null");
 		
-		if(balance.compareTo(payment.getAmount()) >= 0) {
+		if(currentBalance.compareTo(payment.getAmount()) >= 0) {
 			payment.authorize();
-			return balance.subtract(payment.getAmount());
+			return currentBalance.subtract(payment.getAmount());
 		}else {
-			payment.decline(PaymentStatus.FAILED_INSUFFICIENT_FUNDS);
-			return balance;
+			payment.recordFailure("Insufficient funds in wallet");
+			return currentBalance;
 		}
 	}
-
 }
